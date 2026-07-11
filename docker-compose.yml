@@ -1,0 +1,10 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: react-frontend:latest
+    container_name: react_frontend_container
+    restart: unless-stopped
+    ports:
+      - "3000:80"
