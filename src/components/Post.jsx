@@ -154,18 +154,21 @@ export default function Post({ post, onDelete }) {
       {/* Post React Count Info */}
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
         <div className="_feed_inner_timeline_total_reacts_image">
-          <img src="/assets/images/react_img1.png" alt="Image" className="_react_img1" />
-          <img src="/assets/images/react_img2.png" alt="Image" className="_react_img" />
-          <img src="/assets/images/react_img3.png" alt="Image" className="_react_img _rect_img_mbl_none" />
-          <img src="/assets/images/react_img4.png" alt="Image" className="_react_img _rect_img_mbl_none" />
-          <img src="/assets/images/react_img5.png" alt="Image" className="_react_img _rect_img_mbl_none" />
-          <p className="_feed_inner_timeline_total_reacts_para">{reactions}+</p>
+          {reactions > 0 && (
+            <>
+              <img src="/assets/images/react_img1.png" alt="Image" className="_react_img1" />
+              <img src="/assets/images/react_img2.png" alt="Image" className="_react_img" />
+            </>
+          )}
+          <p className="_feed_inner_timeline_total_reacts_para">
+            {reactions} {reactions === 1 ? 'Reaction' : 'Reactions'}
+          </p>
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
             <Link to="#"><span>{post.commentsCount || 0}</span> Comments</Link>
           </p>
-          <p className="_feed_inner_timeline_total_reacts_para2"><span>122</span> Share</p>
+          <p className="_feed_inner_timeline_total_reacts_para2"><span>0</span> Shares</p>
         </div>
       </div>
 
