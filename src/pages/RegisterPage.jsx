@@ -1,20 +1,51 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { apiRequest } from '../services/api';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    setError('');
+
     if (password !== repeatPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
-    // Simulate registration and redirect to feed page
-    navigate('/');
+
+    try {
+      const response = await apiRequest('/api/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          password
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert("Registration successful! Please log in.");
+        navigate('/login');
+      } else {
+        if (data.errors) {
+          const firstErr = Object.values(data.errors)[0][0];
+          setError(firstErr);
+        } else {
+          setError(data.message || "Registration failed.");
+        }
+      }
+    } catch (err) {
+      setError("Failed to connect to the backend server.");
+    }
   };
 
   return (
@@ -52,6 +83,12 @@ export default function RegisterPage() {
                 <p className="_social_registration_content_para _mar_b8">Get Started Now</p>
                 <h4 className="_social_registration_content_title _titl4 _mar_b50">Registration</h4>
                 
+                {error && (
+                  <div className="alert alert-danger _mar_b20" style={{ padding: '10px 15px', borderRadius: '8px', fontSize: '14px' }}>
+                    {error}
+                  </div>
+                )}
+                
                 <button 
                   type="button" 
                   className="_social_registration_content_btn _mar_b40"
@@ -67,6 +104,30 @@ export default function RegisterPage() {
                 
                 <form className="_social_registration_form" onSubmit={handleRegister}>
                   <div className="row">
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label className="_social_registration_label _mar_b8">First Name</label>
+                        <input 
+                          type="text" 
+                          className="form-control _social_registration_input" 
+                          required
+                          value={firstName}
+                          onChange={(e) => setFirstName(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <div className="col-xl-6 col-lg-6 col-md-6 col-sm-12">
+                      <div className="_social_registration_form_input _mar_b14">
+                        <label className="_social_registration_label _mar_b8">Last Name</label>
+                        <input 
+                          type="text" 
+                          className="form-control _social_registration_input" 
+                          required
+                          value={lastName}
+                          onChange={(e) => setLastName(e.target.value)}
+                        />
+                      </div>
+                    </div>
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_registration_form_input _mar_b14">
                         <label className="_social_registration_label _mar_b8">Email</label>

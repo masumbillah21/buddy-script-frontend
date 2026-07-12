@@ -1,15 +1,33 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { apiRequest } from '../services/api';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login and redirect to feed page
-    navigate('/');
+    setError('');
+    try {
+      const response = await apiRequest('/api/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        navigate('/');
+      } else {
+        setError(data.message || "Invalid email or password.");
+      }
+    } catch (err) {
+      setError("Failed to connect to the backend server.");
+    }
   };
 
   return (
@@ -43,6 +61,12 @@ export default function LoginPage() {
                 </div>
                 <p className="_social_login_content_para _mar_b8">Welcome back</p>
                 <h4 className="_social_login_content_title _titl4 _mar_b50">Login to your account</h4>
+                
+                {error && (
+                  <div className="alert alert-danger _mar_b20" style={{ padding: '10px 15px', borderRadius: '8px', fontSize: '14px' }}>
+                    {error}
+                  </div>
+                )}
                 
                 <button 
                   type="button" 

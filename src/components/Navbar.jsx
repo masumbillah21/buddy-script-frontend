@@ -1,8 +1,28 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { apiRequest } from '../services/api';
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  
+  const userStr = localStorage.getItem('user');
+  const user = userStr ? JSON.parse(userStr) : null;
+  const fullName = user ? `${user.first_name} ${user.last_name}` : 'Dylan Field';
+
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      await apiRequest('/api/logout', {
+        method: 'POST'
+      });
+    } catch (err) {
+      console.error("Logout request failed:", err);
+    }
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
   const [notifyDropdownOpen, setNotifyDropdownOpen] = useState(false);
 
   const toggleProfileDropdown = (e) => {
@@ -173,7 +193,7 @@ export default function Navbar() {
                 <img src="/assets/images/profile.png" alt="Image" className="_nav_profile_img" />
               </div>
               <div className="_header_nav_dropdown">
-                <p className="_header_nav_para">Dylan Field</p>
+                <p className="_header_nav_para">{fullName}</p>
                 <button 
                   id="_profile_drop_show_btn" 
                   className="_header_nav_dropdown_btn _dropdown_toggle" 
@@ -197,7 +217,7 @@ export default function Navbar() {
                     <img src="/assets/images/profile.png" alt="Image" className="_nav_drop_img" />
                   </div>
                   <div className="_nav_profile_dropdown_info_txt">
-                    <h4 className="_nav_dropdown_title">Dylan Field</h4>
+                    <h4 className="_nav_dropdown_title">{fullName}</h4>
                     <Link to="#" className="_nav_drop_profile">View Profile</Link>
                   </div>
                 </div>
@@ -238,8 +258,8 @@ export default function Navbar() {
                       </button>
                     </Link>
                   </li>
-                  <li className="_nav_dropdown_list_item">
-                    <Link to="/login" className="_nav_dropdown_link">
+                  <li className="_nav_dropdown_list_item" onClick={handleLogout}>
+                    <Link to="#" className="_nav_dropdown_link">
                       <div className="_nav_drop_info">
                         <span>
                           <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">
@@ -248,7 +268,7 @@ export default function Navbar() {
                         </span>
                         Log Out		
                       </div>
-                      <button type="submit" className="_nav_drop_btn_link">
+                      <button type="button" className="_nav_drop_btn_link">
                         <svg xmlns="http://www.w3.org/2000/svg" width="6" height="10" fill="none" viewBox="0 0 6 10">
                           <path fill="#112032" d="M5 5l.354.354L5.707 5l-.353-.354L5 5zM1.354 9.354l4-4-.708-.708-4 4 .708.708zm4-4.708l-4-4-.708.708 4 4 .708-.708z" opacity=".5"/>
                         </svg>												  
