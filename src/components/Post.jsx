@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
 import { apiRequest } from '../services/api';
+import { formatRelativeTime } from '../utils/time';
 
 export default function Post({ post, onDelete }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reactions, setReactions] = useState(post.reactionsCount || 0);
   const [myReaction, setMyReaction] = useState(post.myReaction || null);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
 
   const toggleDropdown = (e) => {
     e.stopPropagation();
@@ -19,27 +21,64 @@ export default function Post({ post, onDelete }) {
     return () => window.removeEventListener('click', closeDropdown);
   }, []);
 
-  const handleReactClick = async () => {
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const reactionsList = [
+    { type: 'like', label: 'Like', emoji: '👍', color: '#377DFF' },
+    { type: 'love', label: 'Love', emoji: '❤️', color: '#F33A5E' },
+    { type: 'haha', label: 'Haha', emoji: '😆', color: '#FFCC4D' },
+    { type: 'wow', label: 'Wow', emoji: '😮', color: '#FFCC4D' },
+    { type: 'sad', label: 'Sad', emoji: '😢', color: '#FFCC4D' },
+    { type: 'angry', label: 'Angry', emoji: '😡', color: '#F7583B' }
+  ];
+
+  const handleSelectReaction = async (type) => {
     try {
       const response = await apiRequest(`/api/posts/${post.id}/react`, {
         method: 'POST',
         body: JSON.stringify({
-          reaction_type: 'like'
+          reaction_type: type
         })
       });
       if (response.ok) {
         const result = await response.json();
         if (result.message === 'Reaction registered') {
           setReactions(prev => prev + (myReaction ? 0 : 1));
-          setMyReaction('like');
+          setMyReaction(type);
         } else {
           setReactions(prev => Math.max(0, prev - 1));
           setMyReaction(null);
         }
       }
     } catch (err) {
-      console.error("Reaction toggle failed:", err);
+      console.error("Reaction selection failed:", err);
     }
+  };
+
+  const handleReactClick = () => {
+    if (myReaction) {
+      handleSelectReaction(myReaction);
+    } else {
+      handleSelectReaction('like');
+    }
+  };
+
+  const getReactionAvatars = () => {
+    const list = [];
+    if (myReaction) {
+      list.push('/assets/images/profile.png');
+    }
+    const defaultAvatars = [
+      '/assets/images/txt_img.png',
+      '/assets/images/comment_img.png',
+      '/assets/images/react_img3.png',
+      '/assets/images/react_img4.png'
+    ];
+    const needed = reactions - (myReaction ? 1 : 0);
+    for (let i = 0; i < Math.min(needed, 4); i++) {
+      list.push(defaultAvatars[i % defaultAvatars.length]);
+    }
+    return list.slice(0, 4);
   };
 
   return (
@@ -54,7 +93,7 @@ export default function Post({ post, onDelete }) {
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">{post.author || "Karim Saif"}</h4>
               <p className="_feed_inner_timeline_post_box_para">
-                {post.timeAgo || "5 minute ago"} . <Link to="#">Public</Link>
+                {formatRelativeTime(post.createdAt)} . <Link to="#">Public</Link>
               </p>
             </div>
           </div>
@@ -153,20 +192,24 @@ export default function Post({ post, onDelete }) {
 
       {/* Post React Count Info */}
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
-        <div className="_feed_inner_timeline_total_reacts_image">
-          {reactions > 0 && (
-            <>
-              <img src="/assets/images/react_img1.png" alt="Image" className="_react_img1" />
-              <img src="/assets/images/react_img2.png" alt="Image" className="_react_img" />
-            </>
-          )}
-          <p className="_feed_inner_timeline_total_reacts_para">
-            {reactions} {reactions === 1 ? 'Reaction' : 'Reactions'}
-          </p>
-        </div>
-        <div className="_feed_inner_timeline_total_reacts_txt">
+        {reactions > 0 && (
+          <div className="_feed_inner_timeline_total_reacts_image">
+            {getReactionAvatars().map((imgSrc, idx) => (
+              <img 
+                key={idx}
+                src={imgSrc} 
+                alt="User" 
+                className={idx === 0 ? '_react_img1' : '_react_img'} 
+              />
+            ))}
+            <p className="_feed_inner_timeline_total_reacts_para">
+              {reactions === 1 ? '1' : `${reactions}+`}
+            </p>
+          </div>
+        )}
+        <div className="_feed_inner_timeline_total_reacts_txt" style={{ marginLeft: 'auto' }}>
           <p className="_feed_inner_timeline_total_reacts_para1">
-            <Link to="#"><span>{post.commentsCount || 0}</span> Comments</Link>
+            <Link to="#"><span>{commentsCount}</span> Comments</Link>
           </p>
           <p className="_feed_inner_timeline_total_reacts_para2"><span>0</span> Shares</p>
         </div>
@@ -177,17 +220,68 @@ export default function Post({ post, onDelete }) {
         <button 
           className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${myReaction ? '_feed_reaction_active' : ''}`}
           onClick={handleReactClick}
+          onMouseEnter={() => setPickerOpen(true)}
+          onMouseLeave={() => setPickerOpen(false)}
+          style={{ position: 'relative', overflow: 'visible', border: 'none', background: 'none' }}
         >
+          {pickerOpen && (
+            <div 
+              className="_reaction_picker_popover" 
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '0',
+                background: '#fff',
+                borderRadius: '30px',
+                padding: '6px 12px',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                display: 'flex',
+                gap: '12px',
+                zIndex: 1000,
+                cursor: 'default'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {reactionsList.map(item => (
+                <span 
+                  key={item.type}
+                  style={{ 
+                    fontSize: '22px', 
+                    cursor: 'pointer',
+                    transition: 'transform 0.1s ease',
+                    display: 'inline-block'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectReaction(item.type);
+                    setPickerOpen(false);
+                  }}
+                  onMouseOver={(e) => e.target.style.transform = 'scale(1.2)'}
+                  onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                  title={item.label}
+                >
+                  {item.emoji}
+                </span>
+              ))}
+            </div>
+          )}
+          
           <span className="_feed_inner_timeline_reaction_link"> 
-            <span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="none" viewBox="0 0 19 19">
-                <path fill="#FFCC4D" d="M9.5 19a9.5 9.5 0 100-19 9.5 9.5 0 000 19z"/>
-                <path fill="#664500" d="M9.5 11.083c-1.912 0-3.181-.222-4.75-.527-.358-.07-1.056 0-1.056 1.055 0 2.111 2.425 4.75 5.806 4.75 3.38 0 5.805-2.639 5.805-4.75 0-1.055-.697-1.125-1.055-1.055-1.57.305-2.838.527-4.75.527z"/>
-                <path fill="#fff" d="M4.75 11.611s1.583.528 4.75.528 4.75-.528 4.75-.528-1.056 2.111-4.75 2.111-4.75-2.11-4.75-2.11z"/>
-                <path fill="#664500" d="M6.333 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847zM12.667 8.972c.729 0 1.32-.827 1.32-1.847s-.591-1.847-1.32-1.847c-.729 0-1.32.827-1.32 1.847s.591 1.847 1.32 1.847z"/>
-              </svg>
-              Haha
-            </span>
+            {myReaction ? (
+              <span style={{ color: reactionsList.find(r => r.type === myReaction)?.color }}>
+                <span style={{ marginRight: '6px', fontSize: '16px' }}>
+                  {reactionsList.find(r => r.type === myReaction)?.emoji}
+                </span>
+                {reactionsList.find(r => r.type === myReaction)?.label}
+              </span>
+            ) : (
+              <span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up" style={{ marginRight: '6px', stroke: '#666' }}>
+                  <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                </svg>
+                Like
+              </span>
+            )}
           </span>
         </button>
         <button className="_feed_inner_timeline_reaction_comment _feed_reaction">
@@ -214,7 +308,7 @@ export default function Post({ post, onDelete }) {
       </div>
 
       {/* Comments section */}
-      <CommentSection />
+      <CommentSection postId={post.id} onCommentAdded={() => setCommentsCount(prev => prev + 1)} />
     </div>
   );
 }
