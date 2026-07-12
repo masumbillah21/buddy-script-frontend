@@ -1,47 +1,93 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SidebarLeft from '../components/SidebarLeft';
 import SidebarRight from '../components/SidebarRight';
 import Stories from '../components/Stories';
 import CreatePost from '../components/CreatePost';
 import Post from '../components/Post';
+import { apiRequest } from '../services/api';
 
 export default function FeedPage() {
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      author: 'Karim Saif',
-      authorImg: '/assets/images/post_img.png',
-      timeAgo: '5 minute ago',
-      title: '-Healthy Tracking App',
-      image: '/assets/images/timeline_img.png',
-      reactionsCount: 9
-    },
-    {
-      id: 2,
-      author: 'Karim Saif',
-      authorImg: '/assets/images/post_img.png',
-      timeAgo: '1 hour ago',
-      title: 'Excited to show our new workspace setup!',
-      image: '/assets/images/timeline_img.png',
-      reactionsCount: 23
-    }
-  ]);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddPost = (text) => {
-    const newPost = {
-      id: Date.now(),
-      author: 'Dylan Field',
-      authorImg: '/assets/images/profile.png',
-      timeAgo: 'Just now',
-      title: text,
-      image: null,
-      reactionsCount: 0
-    };
-    setPosts([newPost, ...posts]);
+  const loadPosts = async () => {
+    try {
+      const response = await apiRequest('/api/posts');
+      if (response.ok) {
+        const result = await response.json();
+        const mapped = result.data.map(postData => ({
+          id: postData.id,
+          author: `${postData.user.first_name} ${postData.user.last_name}`,
+          authorImg: '/assets/images/profile.png',
+          timeAgo: new Date(postData.created_at).toLocaleDateString(),
+          title: postData.content,
+          image: postData.image_path,
+          reactionsCount: postData.reactions_count || 0,
+          commentsCount: postData.comments_count || 0,
+          myReaction: postData.my_reaction
+        }));
+        setPosts(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load posts", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleDeletePost = (id) => {
-    setPosts(posts.filter(p => p.id !== id));
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const handleAddPost = async (text) => {
+    try {
+      const response = await apiRequest('/api/posts', {
+        method: 'POST',
+        body: JSON.stringify({
+          content: text,
+          visibility: 'public'
+        })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        const postData = result.data;
+        const mappedPost = {
+          id: postData.id,
+          author: `${postData.user.first_name} ${postData.user.last_name}`,
+          authorImg: '/assets/images/profile.png',
+          timeAgo: 'Just now',
+          title: postData.content,
+          image: postData.image_path,
+          reactionsCount: postData.reactions_count || 0,
+          commentsCount: postData.comments_count || 0,
+          myReaction: postData.my_reaction
+        };
+        setPosts(prevPosts => [mappedPost, ...prevPosts]);
+      } else {
+        alert("Failed to publish post.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error connecting to server.");
+    }
+  };
+
+  const handleDeletePost = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+    try {
+      const response = await apiRequest(`/api/posts/${id}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        setPosts(prevPosts => prevPosts.filter(p => p.id !== id));
+      } else {
+        const data = await response.json();
+        alert(data.message || "Failed to delete post.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting post.");
+    }
   };
 
   return (
@@ -62,13 +108,19 @@ export default function FeedPage() {
                 <CreatePost onAddPost={handleAddPost} />
                 
                 {/* Feed Posts */}
-                {posts.map(post => (
-                  <Post 
-                    key={post.id} 
-                    post={post} 
-                    onDelete={handleDeletePost}
-                  />
-                ))}
+                {loading ? (
+                  <div className="text-center _mar_t20">Loading posts...</div>
+                ) : posts.length === 0 ? (
+                  <div className="text-center _mar_t20 text-muted">No posts available. Be the first to write something!</div>
+                ) : (
+                  posts.map(post => (
+                    <Post 
+                      key={post.id} 
+                      post={post} 
+                      onDelete={handleDeletePost}
+                    />
+                  ))
+                )}
               </div>
             </div>
           </div>

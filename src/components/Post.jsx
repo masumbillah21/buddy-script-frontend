@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
+import { apiRequest } from '../services/api';
 
 export default function Post({ post, onDelete }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [reactions, setReactions] = useState(post.reactionsCount || 9);
-  const [reacted, setReacted] = useState(false);
+  const [reactions, setReactions] = useState(post.reactionsCount || 0);
+  const [myReaction, setMyReaction] = useState(post.myReaction || null);
 
   const toggleDropdown = (e) => {
     e.stopPropagation();
@@ -18,13 +19,26 @@ export default function Post({ post, onDelete }) {
     return () => window.removeEventListener('click', closeDropdown);
   }, []);
 
-  const handleReactClick = () => {
-    if (reacted) {
-      setReactions(reactions - 1);
-      setReacted(false);
-    } else {
-      setReactions(reactions + 1);
-      setReacted(true);
+  const handleReactClick = async () => {
+    try {
+      const response = await apiRequest(`/api/posts/${post.id}/react`, {
+        method: 'POST',
+        body: JSON.stringify({
+          reaction_type: 'like'
+        })
+      });
+      if (response.ok) {
+        const result = await response.json();
+        if (result.message === 'Reaction registered') {
+          setReactions(prev => prev + (myReaction ? 0 : 1));
+          setMyReaction('like');
+        } else {
+          setReactions(prev => Math.max(0, prev - 1));
+          setMyReaction(null);
+        }
+      }
+    } catch (err) {
+      console.error("Reaction toggle failed:", err);
     }
   };
 
@@ -149,7 +163,7 @@ export default function Post({ post, onDelete }) {
         </div>
         <div className="_feed_inner_timeline_total_reacts_txt">
           <p className="_feed_inner_timeline_total_reacts_para1">
-            <Link to="#"><span>12</span> Comment</Link>
+            <Link to="#"><span>{post.commentsCount || 0}</span> Comments</Link>
           </p>
           <p className="_feed_inner_timeline_total_reacts_para2"><span>122</span> Share</p>
         </div>
@@ -158,7 +172,7 @@ export default function Post({ post, onDelete }) {
       {/* Post Actions Button Group */}
       <div className="_feed_inner_timeline_reaction">
         <button 
-          className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${reacted ? '_feed_reaction_active' : ''}`}
+          className={`_feed_inner_timeline_reaction_emoji _feed_reaction ${myReaction ? '_feed_reaction_active' : ''}`}
           onClick={handleReactClick}
         >
           <span className="_feed_inner_timeline_reaction_link"> 
