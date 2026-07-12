@@ -112,8 +112,8 @@ export default function LoginPage() {
                   <div className="row">
                     <div className="col-lg-6 col-xl-6 col-md-6 col-sm-12">
                       <div className="form-check _social_login_form_check">
-                        <input className="form-check-input _social_login_form_check_input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" defaultChecked />
-                        <label className="form-check-label _social_login_form_check_label" htmlFor="flexRadioDefault2">Remember me</label>
+                        <input className="form-check-input _social_login_form_check_input" type="checkbox" id="rememberMeCheck" defaultChecked />
+                        <label className="form-check-label _social_login_form_check_label" htmlFor="rememberMeCheck">Remember me</label>
                       </div>
                     </div>
                     <div className="col-lg-6 col-xl-6 col-md-6 col-sm-12">
