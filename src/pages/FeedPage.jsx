@@ -20,8 +20,13 @@ export default function FeedPage() {
           author: `${postData.user.first_name} ${postData.user.last_name}`,
           authorImg: '/assets/images/profile.png',
           createdAt: postData.created_at,
-          title: postData.content,
+          content: postData.content,
           image: postData.image_path,
+          video: postData.video_path,
+          postTitle: postData.title,
+          type: postData.type,
+          eventDate: postData.event_date,
+          visibility: postData.visibility,
           reactionsCount: postData.reactions_count || 0,
           commentsCount: postData.comments_count || 0,
           myReaction: postData.my_reaction
@@ -39,14 +44,37 @@ export default function FeedPage() {
     loadPosts();
   }, []);
 
-  const handleAddPost = async (text) => {
+  const handleAddPost = async (postPayload) => {
     try {
+      let body;
+      if (postPayload && typeof postPayload === 'object') {
+        if (postPayload.imageFile || postPayload.videoFile) {
+          body = new FormData();
+          body.append('content', postPayload.content || '');
+          body.append('type', postPayload.type || 'text');
+          body.append('visibility', postPayload.visibility || 'public');
+          if (postPayload.title) body.append('title', postPayload.title);
+          if (postPayload.event_date) body.append('event_date', postPayload.event_date);
+          
+          if (postPayload.imageFile) {
+            body.append('image', postPayload.imageFile);
+          }
+          if (postPayload.videoFile) {
+            body.append('video', postPayload.videoFile);
+          }
+        } else {
+          body = JSON.stringify(postPayload);
+        }
+      } else {
+        body = JSON.stringify({
+          content: postPayload,
+          visibility: 'public'
+        });
+      }
+
       const response = await apiRequest('/api/posts', {
         method: 'POST',
-        body: JSON.stringify({
-          content: text,
-          visibility: 'public'
-        })
+        body: body
       });
       if (response.ok) {
         const result = await response.json();
@@ -56,8 +84,13 @@ export default function FeedPage() {
           author: `${postData.user.first_name} ${postData.user.last_name}`,
           authorImg: '/assets/images/profile.png',
           createdAt: postData.created_at,
-          title: postData.content,
+          content: postData.content,
           image: postData.image_path,
+          video: postData.video_path,
+          postTitle: postData.title,
+          type: postData.type,
+          eventDate: postData.event_date,
+          visibility: postData.visibility,
           reactionsCount: postData.reactions_count || 0,
           commentsCount: postData.comments_count || 0,
           myReaction: postData.my_reaction

@@ -93,7 +93,9 @@ export default function Post({ post, onDelete }) {
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">{post.author || "Karim Saif"}</h4>
               <p className="_feed_inner_timeline_post_box_para">
-                {formatRelativeTime(post.createdAt)} . <Link to="#">Public</Link>
+                {formatRelativeTime(post.createdAt)} . <Link to="#">
+                  {post.visibility === 'private' ? '🔒 Private' : '🌐 Public'}
+                </Link>
               </p>
             </div>
           </div>
@@ -179,13 +181,60 @@ export default function Post({ post, onDelete }) {
           </div>
         </div>
         
-        {/* Post Title */}
-        <h4 className="_feed_inner_timeline_post_title">{post.title || "-Healthy Tracking App"}</h4>
+        {/* Post Content */}
+        {post.content && (
+          <h4 className="_feed_inner_timeline_post_title" style={{ fontWeight: 'normal', whiteSpace: 'pre-wrap' }}>
+            {post.content}
+          </h4>
+        )}
         
-        {/* Post Image */}
-        {post.image && (
-          <div className="_feed_inner_timeline_image">
-            <img src={post.image} alt="" className="_time_img" />
+        {/* Custom Post Type Contents */}
+        {post.type === 'photo' && post.image && (
+          <div className="_feed_inner_timeline_image _mar_t20">
+            <img src={post.image} alt="" className="_time_img" style={{ borderRadius: '6px' }} />
+          </div>
+        )}
+
+        {post.type === 'video' && post.video && (
+          <div className="_feed_inner_timeline_image _mar_t20" style={{ overflow: 'hidden' }}>
+            <video src={post.video} controls style={{ width: '100%', borderRadius: '6px', maxHeight: '450px', background: '#000' }} />
+          </div>
+        )}
+
+        {post.type === 'event' && (
+          <div className="_mar_t20" style={{
+            background: '#f8f9fa',
+            borderLeft: '4px solid #377DFF',
+            borderRadius: '6px',
+            padding: '16px',
+            boxShadow: 'inset 0 0 4px rgba(0,0,0,0.05)'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#111' }}>
+              📅 {post.postTitle}
+            </h3>
+            <p style={{ margin: 0, fontSize: '14px', color: '#377DFF', fontWeight: '500' }}>
+              Time: {new Date(post.eventDate).toLocaleString()}
+            </p>
+          </div>
+        )}
+
+        {post.type === 'article' && (
+          <div className="_mar_t20" style={{
+            background: '#fff',
+            border: '1px solid #e0e0e0',
+            borderRadius: '6px',
+            padding: '20px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
+          }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 8px 0', color: '#111' }}>
+              📰 {post.postTitle}
+            </h3>
+          </div>
+        )}
+
+        {(!post.type || post.type === 'text') && post.image && (
+          <div className="_feed_inner_timeline_image _mar_t20">
+            <img src={post.image} alt="" className="_time_img" style={{ borderRadius: '6px' }} />
           </div>
         )}
       </div>
