@@ -23,6 +23,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
           likes: commentData.reactions_count || 0,
           liked: commentData.my_reaction ? true : false,
           myReaction: commentData.my_reaction,
+          reactionTypes: commentData.reaction_types || [],
           time: commentData.created_at,
           replies: commentData.replies ? commentData.replies.map(replyData => ({
             id: replyData.id,
@@ -32,6 +33,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
             likes: replyData.reactions_count || 0,
             liked: replyData.my_reaction ? true : false,
             myReaction: replyData.my_reaction,
+            reactionTypes: replyData.reaction_types || [],
             time: replyData.created_at,
           })) : []
         }));
@@ -117,53 +119,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
         })
       });
       if (response.ok) {
-        const result = await response.json();
-        const isRegistered = result.message === 'Reaction registered';
-        const reactionTypeRegistered = isRegistered ? reactionType : null;
-
-        setComments(prevComments => prevComments.map(c => {
-          if (c.id === id) {
-            let newLikes = c.likes;
-            if (isRegistered) {
-              if (!c.myReaction) {
-                newLikes += 1;
-              }
-            } else {
-              newLikes = Math.max(0, newLikes - 1);
-            }
-            return {
-              ...c,
-              liked: isRegistered,
-              myReaction: reactionTypeRegistered,
-              likes: newLikes
-            };
-          }
-          if (c.replies && c.replies.length > 0) {
-            return {
-              ...c,
-              replies: c.replies.map(r => {
-                if (r.id === id) {
-                  let newLikes = r.likes;
-                  if (isRegistered) {
-                    if (!r.myReaction) {
-                      newLikes += 1;
-                    }
-                  } else {
-                    newLikes = Math.max(0, newLikes - 1);
-                  }
-                  return {
-                    ...r,
-                    liked: isRegistered,
-                    myReaction: reactionTypeRegistered,
-                    likes: newLikes
-                  };
-                }
-                return r;
-              })
-            };
-          }
-          return c;
-        }));
+        loadComments();
       }
     } catch (err) {
       console.error("Failed to react to comment:", err);
@@ -256,12 +212,22 @@ export default function CommentSection({ postId, onCommentAdded }) {
                 {comment.likes > 0 && (
                   <div className="_total_reactions" onClick={() => setModalCommentId(comment.id)} style={{ cursor: 'pointer' }}>
                     <div className="_total_react">
-                      <span className="_reaction_like">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
-                      </span>
-                      <span className="_reaction_heart">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                      </span>
+                      {(comment.reactionTypes && comment.reactionTypes.some(t => ['like', 'haha', 'wow', 'sad', 'angry'].includes(t))) && (
+                        <span className="_reaction_like">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                        </span>
+                      )}
+                      {(comment.reactionTypes && comment.reactionTypes.includes('love')) && (
+                        <span className="_reaction_heart">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                        </span>
+                      )}
+                      {/* Fallback to show Like if no distinct type mapping is active yet */}
+                      {(!comment.reactionTypes || comment.reactionTypes.length === 0) && (
+                        <span className="_reaction_like">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                        </span>
+                      )}
                     </div>
                     <span className="_total">{comment.likes}</span>
                   </div>
@@ -365,12 +331,22 @@ export default function CommentSection({ postId, onCommentAdded }) {
                       {reply.likes > 0 && (
                         <div className="_total_reactions" onClick={() => setModalCommentId(reply.id)} style={{ cursor: 'pointer' }}>
                           <div className="_total_react">
-                            <span className="_reaction_like">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
-                            </span>
-                            <span className="_reaction_heart">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                            </span>
+                            {(reply.reactionTypes && reply.reactionTypes.some(t => ['like', 'haha', 'wow', 'sad', 'angry'].includes(t))) && (
+                              <span className="_reaction_like">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                              </span>
+                            )}
+                            {(reply.reactionTypes && reply.reactionTypes.includes('love')) && (
+                              <span className="_reaction_heart">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                              </span>
+                            )}
+                            {/* Fallback to show Like if no distinct type mapping is active yet */}
+                            {(!reply.reactionTypes || reply.reactionTypes.length === 0) && (
+                              <span className="_reaction_like">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                              </span>
+                            )}
                           </div>
                           <span className="_total">{reply.likes}</span>
                         </div>
@@ -456,28 +432,30 @@ export default function CommentSection({ postId, onCommentAdded }) {
 
               {/* Toggleable nested reply input field */}
               {replyBoxes[comment.id] && (
-                <div className="_feed_inner_comment_box mt-2" style={{ paddingLeft: '40px' }}>
-                  <form className="_feed_inner_comment_box_form" onSubmit={(e) => handleAddReply(e, comment.id)}>
-                    <div className="_feed_inner_comment_box_content">
-                      <div className="_feed_inner_comment_box_content_image">
-                        <img src="/assets/images/txt_img.png" alt="" className="_comment_img" />
+                <div style={{ marginLeft: '40px' }} className="mt-2">
+                  <div className="_feed_inner_comment_box">
+                    <form className="_feed_inner_comment_box_form" onSubmit={(e) => handleAddReply(e, comment.id)}>
+                      <div className="_feed_inner_comment_box_content">
+                        <div className="_feed_inner_comment_box_content_image">
+                          <img src="/assets/images/txt_img.png" alt="" className="_comment_img" />
+                        </div>
+                        <div className="_feed_inner_comment_box_content_txt">
+                          <textarea 
+                            className="form-control _comment_textarea" 
+                            placeholder="Write a reply..." 
+                            id={`floatingTextareaReply-${comment.id}`}
+                            value={replyTexts[comment.id] || ''}
+                            onChange={(e) => setReplyTexts(prev => ({ ...prev, [comment.id]: e.target.value }))}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                handleAddReply(e, comment.id);
+                              }
+                            }}
+                          ></textarea>
+                        </div>
                       </div>
-                      <div className="_feed_inner_comment_box_content_txt">
-                        <textarea 
-                          className="form-control _comment_textarea" 
-                          placeholder="Write a reply..." 
-                          id={`floatingTextareaReply-${comment.id}`}
-                          value={replyTexts[comment.id] || ''}
-                          onChange={(e) => setReplyTexts(prev => ({ ...prev, [comment.id]: e.target.value }))}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey) {
-                              handleAddReply(e, comment.id);
-                            }
-                          }}
-                        ></textarea>
-                      </div>
-                    </div>
-                  </form>
+                    </form>
+                  </div>
                 </div>
               )}
             </div>
