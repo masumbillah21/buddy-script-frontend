@@ -18,7 +18,8 @@ export default function FeedPage() {
         const mapped = result.data.map(postData => ({
           id: postData.id,
           author: `${postData.user.first_name} ${postData.user.last_name}`,
-          authorImg: '/assets/images/profile.png',
+          authorImg: postData.user.profile_image || '/assets/images/profile.png',
+          user: postData.user,
           createdAt: postData.created_at,
           content: postData.content,
           image: postData.image_path,
@@ -82,7 +83,8 @@ export default function FeedPage() {
         const mappedPost = {
           id: postData.id,
           author: `${postData.user.first_name} ${postData.user.last_name}`,
-          authorImg: '/assets/images/profile.png',
+          authorImg: postData.user.profile_image || '/assets/images/profile.png',
+          user: postData.user,
           createdAt: postData.created_at,
           content: postData.content,
           image: postData.image_path,

@@ -4,6 +4,7 @@ import CommentSection from './CommentSection';
 import { apiRequest } from '../services/api';
 import { formatRelativeTime } from '../utils/time';
 import ReactionsModal from './ReactionsModal';
+import UserAvatar from './UserAvatar';
 
 export default function Post({ post, onDelete }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -115,7 +116,7 @@ export default function Post({ post, onDelete }) {
         <div className="_feed_inner_timeline_post_top">
           <div className="_feed_inner_timeline_post_box">
             <div className="_feed_inner_timeline_post_box_image">
-              <img src={post.authorImg || "/assets/images/post_img.png"} alt="" className="_post_img" />
+              <UserAvatar user={post.user} className="_post_img" />
             </div>
             <div className="_feed_inner_timeline_post_box_txt">
               <h4 className="_feed_inner_timeline_post_box_title">{post.author || "Karim Saif"}</h4>

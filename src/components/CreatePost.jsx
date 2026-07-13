@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import UserAvatar from './UserAvatar';
 
 export default function CreatePost({ onAddPost }) {
   const [postText, setPostText] = useState('');
@@ -9,6 +10,9 @@ export default function CreatePost({ onAddPost }) {
 
   const [imageFile, setImageFile] = useState(null);
   const [videoFile, setVideoFile] = useState(null);
+
+  const userStr = localStorage.getItem('user');
+  const currentUser = userStr ? JSON.parse(userStr) : null;
 
   const handlePostSubmit = (e) => {
     e.preventDefault();
@@ -54,7 +58,7 @@ export default function CreatePost({ onAddPost }) {
     <div className="_feed_inner_text_area _b_radious6 _padd_b24 _padd_t24 _padd_r24 _padd_l24 _mar_b16">
       <div className="_feed_inner_text_area_box">
         <div className="_feed_inner_text_area_box_image">
-          <img src="/assets/images/profile.png" alt="User" className="_txt_img" />
+          <UserAvatar user={currentUser} className="_txt_img" />
         </div>
         <div className="form-floating _feed_inner_text_area_box_form">
           <textarea 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../services/api';
+import UserAvatar from './UserAvatar';
 
 export default function ReactionsModal({ postId, commentId, onClose }) {
   const [reactions, setReactions] = useState([]);
@@ -147,11 +148,7 @@ export default function ReactionsModal({ postId, commentId, onClose }) {
               {displayedUsers.map(item => (
                 <div key={item.id} className="reactions-modal-user-item">
                   <div className="reactions-modal-avatar-wrapper">
-                    <img
-                      src="/assets/images/profile.png"
-                      alt={`${item.first_name} ${item.last_name}`}
-                      className="reactions-modal-avatar"
-                    />
+                    <UserAvatar user={item} className="reactions-modal-avatar" />
                     <span
                       className="reactions-modal-mini-emoji"
                       style={{ backgroundColor: reactionColors[item.reaction_type] || '#fff' }}

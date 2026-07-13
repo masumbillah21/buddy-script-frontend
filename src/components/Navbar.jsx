@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../services/api';
+import UserAvatar from './UserAvatar';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -190,7 +191,7 @@ export default function Navbar() {
             
             <div className="_header_nav_profile">
               <div className="_header_nav_profile_image">
-                <img src="/assets/images/txt_img.png" alt="Image" className="_nav_profile_img" />
+                <UserAvatar user={user} className="_nav_profile_img" />
               </div>
               <div className="_header_nav_dropdown">
                 <p className="_header_nav_para">{fullName}</p>
@@ -214,7 +215,7 @@ export default function Navbar() {
               >
                 <div className="_nav_profile_dropdown_info">
                   <div className="_nav_profile_dropdown_image">
-                    <img src="/assets/images/txt_img.png" alt="Image" className="_nav_drop_img" />
+                    <UserAvatar user={user} className="_nav_drop_img" />
                   </div>
                   <div className="_nav_profile_dropdown_info_txt">
                     <h4 className="_nav_dropdown_title">{fullName}</h4>

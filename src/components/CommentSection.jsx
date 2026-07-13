@@ -3,12 +3,16 @@ import { Link } from 'react-router-dom';
 import { apiRequest } from '../services/api';
 import { formatRelativeTime } from '../utils/time';
 import ReactionsModal from './ReactionsModal';
+import UserAvatar from './UserAvatar';
 
 export default function CommentSection({ postId, onCommentAdded }) {
   const [comments, setComments] = useState([]);
   const [newCommentText, setNewCommentText] = useState('');
   const [replyBoxes, setReplyBoxes] = useState({});
   const [replyTexts, setReplyTexts] = useState({});
+
+  const userStr = localStorage.getItem('user');
+  const currentUser = userStr ? JSON.parse(userStr) : null;
 
   const loadComments = useCallback(async () => {
     try {
@@ -18,7 +22,8 @@ export default function CommentSection({ postId, onCommentAdded }) {
         const mapped = result.data.map(commentData => ({
           id: commentData.id,
           author: `${commentData.user.first_name} ${commentData.user.last_name}`,
-          avatar: '/assets/images/txt_img.png',
+          user: commentData.user,
+          avatar: commentData.user.profile_image || '/assets/images/txt_img.png',
           text: commentData.content,
           likes: commentData.reactions_count || 0,
           liked: commentData.my_reaction ? true : false,
@@ -28,7 +33,8 @@ export default function CommentSection({ postId, onCommentAdded }) {
           replies: commentData.replies ? commentData.replies.map(replyData => ({
             id: replyData.id,
             author: `${replyData.user.first_name} ${replyData.user.last_name}`,
-            avatar: '/assets/images/txt_img.png',
+            user: replyData.user,
+            avatar: replyData.user.profile_image || '/assets/images/txt_img.png',
             text: replyData.content,
             likes: replyData.reactions_count || 0,
             liked: replyData.my_reaction ? true : false,
@@ -168,7 +174,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
         <form className="_feed_inner_comment_box_form" onSubmit={handleAddComment}>
           <div className="_feed_inner_comment_box_content">
             <div className="_feed_inner_comment_box_content_image">
-              <img src="/assets/images/txt_img.png" alt="" className="_comment_img" />
+              <UserAvatar user={currentUser} className="_comment_img" />
             </div>
             <div className="_feed_inner_comment_box_content_txt">
               <textarea 
@@ -194,7 +200,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
           <div className="_comment_main" key={comment.id}>
             <div className="_comment_image">
               <Link to="#" className="_comment_image_link">
-                <img src={comment.avatar} alt="" className="_comment_img1" />
+                <UserAvatar user={comment.user} className="_comment_img1" />
               </Link>
             </div>
             <div className="_comment_area">
@@ -313,7 +319,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
                 <div className="_comment_main" key={reply.id} style={{ marginLeft: '40px', marginTop: '10px' }}>
                   <div className="_comment_image">
                     <Link to="#" className="_comment_image_link">
-                      <img src={reply.avatar} alt="" className="_comment_img1" />
+                      <UserAvatar user={reply.user} className="_comment_img1" />
                     </Link>
                   </div>
                   <div className="_comment_area">
@@ -437,7 +443,7 @@ export default function CommentSection({ postId, onCommentAdded }) {
                     <form className="_feed_inner_comment_box_form" onSubmit={(e) => handleAddReply(e, comment.id)}>
                       <div className="_feed_inner_comment_box_content">
                         <div className="_feed_inner_comment_box_content_image">
-                          <img src="/assets/images/txt_img.png" alt="" className="_comment_img" />
+                          <UserAvatar user={currentUser} className="_comment_img" />
                         </div>
                         <div className="_feed_inner_comment_box_content_txt">
                           <textarea 
