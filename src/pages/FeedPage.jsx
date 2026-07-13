@@ -55,7 +55,7 @@ export default function FeedPage() {
           body.append('visibility', postPayload.visibility || 'public');
           if (postPayload.title) body.append('title', postPayload.title);
           if (postPayload.event_date) body.append('event_date', postPayload.event_date);
-          
+
           if (postPayload.imageFile) {
             body.append('image', postPayload.imageFile);
           }
@@ -97,7 +97,12 @@ export default function FeedPage() {
         };
         setPosts(prevPosts => [mappedPost, ...prevPosts]);
       } else {
-        alert("Failed to publish post.");
+        try {
+          const errorData = await response.json();
+          alert(errorData.message || "Failed to publish post.");
+        } catch (e) {
+          alert("Failed to publish post.");
+        }
       }
     } catch (err) {
       console.error(err);
@@ -129,17 +134,17 @@ export default function FeedPage() {
         <div className="row">
           {/* Left Column Sidebar */}
           <SidebarLeft />
-          
+
           {/* Middle Column Content */}
           <div className="col-xl-6 col-lg-6 col-md-12 col-sm-12">
             <div className="_layout_middle_wrap">
               <div className="_layout_middle_inner">
                 {/* Story Slider Cards */}
                 <Stories />
-                
+
                 {/* Create Post Textbox */}
                 <CreatePost onAddPost={handleAddPost} />
-                
+
                 {/* Feed Posts */}
                 {loading ? (
                   <div className="text-center _mar_t20">Loading posts...</div>
@@ -147,9 +152,9 @@ export default function FeedPage() {
                   <div className="text-center _mar_t20 text-muted">No posts available. Be the first to write something!</div>
                 ) : (
                   posts.map(post => (
-                    <Post 
-                      key={post.id} 
-                      post={post} 
+                    <Post
+                      key={post.id}
+                      post={post}
                       onDelete={handleDeletePost}
                     />
                   ))
@@ -157,7 +162,7 @@ export default function FeedPage() {
               </div>
             </div>
           </div>
-          
+
           {/* Right Column Sidebar */}
           <SidebarRight />
         </div>

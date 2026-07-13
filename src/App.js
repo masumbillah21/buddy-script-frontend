@@ -21,31 +21,31 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route 
-          path="/login" 
+        <Route
+          path="/login"
           element={
             <PublicRoute>
               <LoginPage />
             </PublicRoute>
-          } 
+          }
         />
-        <Route 
-          path="/register" 
+        <Route
+          path="/register"
           element={
             <PublicRoute>
               <RegisterPage />
             </PublicRoute>
-          } 
+          }
         />
-        <Route 
-          path="/" 
+        <Route
+          path="/"
           element={
             <ProtectedRoute>
               <Layout>
                 <FeedPage />
               </Layout>
             </ProtectedRoute>
-          } 
+          }
         />
         {/* Catch-all route redirecting back to home page */}
         <Route path="*" element={<Navigate to="/" replace />} />

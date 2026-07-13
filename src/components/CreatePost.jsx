@@ -14,6 +14,20 @@ export default function CreatePost({ onAddPost }) {
     e.preventDefault();
     if (!postText.trim() && !imageFile && !videoFile && !title.trim()) return;
 
+    if (postType === 'photo' && imageFile) {
+      if (imageFile.size > 10 * 1024 * 1024) {
+        alert('Image file size cannot exceed 10MB.');
+        return;
+      }
+    }
+
+    if (postType === 'video' && videoFile) {
+      if (videoFile.size > 50 * 1024 * 1024) {
+        alert('Video file size cannot exceed 50MB.');
+        return;
+      }
+    }
+
     if (onAddPost) {
       onAddPost({
         content: postText,
