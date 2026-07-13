@@ -3,12 +3,14 @@ import { Link } from 'react-router-dom';
 import CommentSection from './CommentSection';
 import { apiRequest } from '../services/api';
 import { formatRelativeTime } from '../utils/time';
+import ReactionsModal from './ReactionsModal';
 
 export default function Post({ post, onDelete }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [reactions, setReactions] = useState(post.reactionsCount || 0);
   const [myReaction, setMyReaction] = useState(post.myReaction || null);
   const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const toggleDropdown = (e) => {
     e.stopPropagation();
@@ -24,12 +26,12 @@ export default function Post({ post, onDelete }) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const reactionsList = [
-    { type: 'like', label: 'Like', emoji: '👍', color: '#377DFF' },
-    { type: 'love', label: 'Love', emoji: '❤️', color: '#F33A5E' },
-    { type: 'haha', label: 'Haha', emoji: '😆', color: '#FFCC4D' },
-    { type: 'wow', label: 'Wow', emoji: '😮', color: '#FFCC4D' },
-    { type: 'sad', label: 'Sad', emoji: '😢', color: '#FFCC4D' },
-    { type: 'angry', label: 'Angry', emoji: '😡', color: '#F7583B' }
+    { type: 'like', label: 'Like', emoji: '👍', icon: '/assets/images/react_img1.png', color: '#377DFF' },
+    { type: 'love', label: 'Love', emoji: '❤️', icon: '/assets/images/react_img2.png', color: '#F33A5E' },
+    { type: 'haha', label: 'Haha', emoji: '😆', icon: '/assets/images/react_img3.png', color: '#FFCC4D' },
+    { type: 'wow', label: 'Wow', emoji: '😮', icon: '/assets/images/react_img4.png', color: '#FFCC4D' },
+    { type: 'sad', label: 'Sad', emoji: '😢', icon: '/assets/images/react_img5.png', color: '#FFCC4D' },
+    { type: 'angry', label: 'Angry', emoji: '😡', icon: '/assets/images/react_img6.png', color: '#F7583B' }
   ];
 
   const handleSelectReaction = async (type) => {
@@ -63,22 +65,47 @@ export default function Post({ post, onDelete }) {
     }
   };
 
-  const getReactionAvatars = () => {
-    const list = [];
+  const getReactionIcons = () => {
+    const icons = [];
     if (myReaction) {
-      list.push('/assets/images/profile.png');
+      const myIcon = reactionsList.find(r => r.type === myReaction)?.icon;
+      if (myIcon) icons.push(myIcon);
     }
-    const defaultAvatars = [
-      '/assets/images/txt_img.png',
-      '/assets/images/comment_img.png',
-      '/assets/images/react_img3.png',
-      '/assets/images/react_img4.png'
+    const popular = [
+      '/assets/images/react_img1.png',
+      '/assets/images/react_img2.png',
+      '/assets/images/react_img3.png'
     ];
-    const needed = reactions - (myReaction ? 1 : 0);
-    for (let i = 0; i < Math.min(needed, 4); i++) {
-      list.push(defaultAvatars[i % defaultAvatars.length]);
+    for (let item of popular) {
+      if (icons.length < Math.min(reactions, 3) && !icons.includes(item)) {
+        icons.push(item);
+      }
     }
-    return list.slice(0, 4);
+    return icons;
+  };
+
+  const renderReactionIcon = (type, size = 16, strokeColor = null) => {
+    if (type === 'like') {
+      return (
+        <span className="_reaction_like" style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={strokeColor || '#377DFF'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-thumbs-up"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+        </span>
+      );
+    }
+    if (type === 'love') {
+      return (
+        <span className="_reaction_heart" style={{ display: 'inline-flex', alignItems: 'center' }}>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={strokeColor || 'red'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </span>
+      );
+    }
+    const emojiMap = {
+      haha: '😆',
+      wow: '😮',
+      sad: '😢',
+      angry: '😡'
+    };
+    return <span style={{ fontSize: `${size + 2}px`, lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>{emojiMap[type] || ''}</span>;
   };
 
   return (
@@ -242,12 +269,16 @@ export default function Post({ post, onDelete }) {
       {/* Post React Count Info */}
       <div className="_feed_inner_timeline_total_reacts _padd_r24 _padd_l24 _mar_b26">
         {reactions > 0 && (
-          <div className="_feed_inner_timeline_total_reacts_image">
-            {getReactionAvatars().map((imgSrc, idx) => (
+          <div 
+            className="_feed_inner_timeline_total_reacts_image"
+            onClick={() => setModalOpen(true)}
+            style={{ cursor: 'pointer' }}
+          >
+            {getReactionIcons().map((imgSrc, idx) => (
               <img 
                 key={idx}
                 src={imgSrc} 
-                alt="User" 
+                alt="Reaction" 
                 className={idx === 0 ? '_react_img1' : '_react_img'} 
               />
             ))}
@@ -282,12 +313,13 @@ export default function Post({ post, onDelete }) {
                 left: '0',
                 background: '#fff',
                 borderRadius: '30px',
-                padding: '6px 12px',
+                padding: '8px 16px',
                 boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
                 display: 'flex',
                 gap: '12px',
                 zIndex: 1000,
-                cursor: 'default'
+                cursor: 'default',
+                alignItems: 'center'
               }}
               onClick={(e) => e.stopPropagation()}
             >
@@ -295,21 +327,21 @@ export default function Post({ post, onDelete }) {
                 <span 
                   key={item.type}
                   style={{ 
-                    fontSize: '22px', 
                     cursor: 'pointer',
                     transition: 'transform 0.1s ease',
-                    display: 'inline-block'
+                    display: 'inline-flex',
+                    alignItems: 'center'
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleSelectReaction(item.type);
                     setPickerOpen(false);
                   }}
-                  onMouseOver={(e) => e.target.style.transform = 'scale(1.2)'}
-                  onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
+                  onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.2)'}
+                  onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
                   title={item.label}
                 >
-                  {item.emoji}
+                  {renderReactionIcon(item.type, 22)}
                 </span>
               ))}
             </div>
@@ -317,9 +349,9 @@ export default function Post({ post, onDelete }) {
           
           <span className="_feed_inner_timeline_reaction_link"> 
             {myReaction ? (
-              <span style={{ color: reactionsList.find(r => r.type === myReaction)?.color }}>
-                <span style={{ marginRight: '6px', fontSize: '16px' }}>
-                  {reactionsList.find(r => r.type === myReaction)?.emoji}
+              <span style={{ color: reactionsList.find(r => r.type === myReaction)?.color, display: 'inline-flex', alignItems: 'center' }}>
+                <span style={{ marginRight: '6px', display: 'inline-flex', alignItems: 'center' }}>
+                  {renderReactionIcon(myReaction, 18, reactionsList.find(r => r.type === myReaction)?.color)}
                 </span>
                 {reactionsList.find(r => r.type === myReaction)?.label}
               </span>
@@ -358,6 +390,11 @@ export default function Post({ post, onDelete }) {
 
       {/* Comments section */}
       <CommentSection postId={post.id} onCommentAdded={() => setCommentsCount(prev => prev + 1)} />
+
+      {/* Reactions modal */}
+      {modalOpen && (
+        <ReactionsModal postId={post.id} onClose={() => setModalOpen(false)} />
+      )}
     </div>
   );
 }
