@@ -35,6 +35,7 @@ export default function UserAvatar({ user, className, style = {} }) {
         borderRadius: '50%',
         textTransform: 'uppercase',
         userSelect: 'none',
+        aspectRatio: '1/1',
         ...style
       }}
     >

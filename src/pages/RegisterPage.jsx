@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiRequest } from '../services/api';
+import { useToast } from '../context/ToastContext';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -33,7 +35,7 @@ export default function RegisterPage() {
 
       const data = await response.json();
       if (response.ok) {
-        alert("Registration successful! Please log in.");
+        showToast("Registration successful! Please log in.");
         navigate('/login');
       } else {
         if (data.errors) {
