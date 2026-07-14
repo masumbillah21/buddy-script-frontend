@@ -8,3 +8,9 @@ services:
     restart: unless-stopped
     ports:
       - "3000:80"
+    networks:
+      - buddy_network
+
+networks:
+  buddy_network:
+    name: buddy_network
