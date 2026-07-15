@@ -1,6 +1,4 @@
-const API_BASE_URL = (process.env.REACT_APP_API_BASE_URL && process.env.REACT_APP_API_BASE_URL.trim() !== '') 
-  ? process.env.REACT_APP_API_BASE_URL 
-  : 'http://buddy-api.masum-billah.com';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || '';
 
 export async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('auth_token');
