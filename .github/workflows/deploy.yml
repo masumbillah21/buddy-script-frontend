@@ -1,0 +1,55 @@
+name: 🚀 React Frontend Deploy via SSH (Namecheap)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build & Deploy React App
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node.js & cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      # 3️⃣ Install NPM dependencies and build
+      - name: Install dependencies & build
+        env:
+          REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+        run: |
+          npm ci
+          npm run build
+
+      # 4️⃣ Verify build folder
+      - name: Verify build artifacts
+        run: |
+          test -d build && echo "✅ build folder ready"
+          test -f build/index.html && echo "✅ index.html ready"
+          test -f build/.htaccess && echo "✅ .htaccess SPA routing ready"
+
+      # 5️⃣ Deploy built files to Namecheap via SSH (SCP)
+      - name: 🧬 Deploy to Server via SSH
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSKEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          source: "build/*"
+          target: "${{ secrets.FRONTEND_SERVER_TARGET_PATH }}"
+          strip_components: 1
+          overwrite: true
