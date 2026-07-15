@@ -53,3 +53,10 @@ npm install
 npm start
 ```
 The React frontend service will listen on [http://localhost:3000](http://localhost:3000).
+
+### 2. Local Docker Setup
+Alternatively, you can run the application using Docker Compose:
+```bash
+docker compose up --build -d
+```
+The React frontend container will spin up, serving the built production assets via Nginx, and will listen on [http://localhost:3000](http://localhost:3000).
