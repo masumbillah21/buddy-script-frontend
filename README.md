@@ -4,7 +4,7 @@ This is the React-based frontend client for the Appifylab Social Platform, suppl
 
 ---
 
-## 🌐 Production & Live Deployment Links
+## Production & Live Deployment Links
 
 * **Live Web Application**: [http://buddy-script.masum-billah.com/](http://buddy-script.masum-billah.com/)
 * **Live API Backend**: [http://buddy-api.masum-billah.com/](http://buddy-api.masum-billah.com/)
