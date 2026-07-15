@@ -1,11 +1,21 @@
 # Appifylab Social Platform Client (Frontend)
 
-This is the React-based frontend client for the Appifylab Social Platform task, supplying a pixel-perfect user interface matching the original designer mockup template, dynamic API integration, full reactions systems, nested comment reply sections, and image fallbacks.
+This is the React-based frontend client for the Appifylab Social Platform, supplying a pixel-perfect user interface matching the original designer mockup template, dynamic API integration, full reactions systems, nested comment reply sections, and image fallbacks.
+
+---
+
+## 🌐 Production & Live Deployment Links
+
+* **Live Web Application**: [http://buddy-script.masum-billah.com/](http://buddy-script.masum-billah.com/)
+* **Live API Backend**: [http://buddy-api.masum-billah.com/](http://buddy-api.masum-billah.com/)
+* **Interactive API Documentation**: [http://buddy-api.masum-billah.com/api/documentation](http://buddy-api.masum-billah.com/api/documentation)
+
+---
 
 ## Tech Stack
-* **Framework**: React, React Router
-* **Styling**: Vanilla CSS (fully responsive, matches original grid designs)
-* **Production Build**: Compiles into `/app/build`, served using Alpine Nginx inside the frontend container.
+* **Framework**: React 18, React Router 6
+* **Styling**: Vanilla CSS (fully responsive matching design mockup grid systems)
+* **CI/CD Pipeline**: GitHub Actions build & SSH SCP automated deployment to Namecheap Shared Hosting
 
 ---
 
@@ -37,13 +47,9 @@ To ensure optimal performance and avoid server errors, upload files are validate
 
 ## Local Setup & Development
 
-### 1. Build and Run Container
-Rebuild the frontend container image and spin it up on the Docker network:
+### 1. Build and Run Local Server
 ```bash
-docker compose up --build -d
+npm install
+npm start
 ```
-The React frontend service will be compiled and listen on [http://localhost:3000](http://localhost:3000).
-
-### 2. Port Configuration
-* **React App**: Accessible on port `3000` (proxies `/api` requests to port `8000`).
-* **API Endpoints**: Routed to backend listening on port `8000`.
+The React frontend service will listen on [http://localhost:3000](http://localhost:3000).
