@@ -1,4 +1,4 @@
-name: 🚀 React Frontend Deploy via SSH (Namecheap)
+name: 🚀 React Frontend Deploy
 
 on:
   push:
