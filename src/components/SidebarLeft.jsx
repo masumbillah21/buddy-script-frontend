@@ -122,7 +122,7 @@ export default function SidebarLeft() {
                 <div className="_left_inner_area_suggest_info_box">
                   <div className="_left_inner_area_suggest_info_image">
                     <Link to="#">
-                      <img src={s.img} alt="Image" className="_info_img" />
+                      <img src={s.img} alt="" className="_info_img" />
                     </Link>
                   </div>
                   <div className="_left_inner_area_suggest_info_txt">
@@ -157,7 +157,7 @@ export default function SidebarLeft() {
               <div className="_left_inner_event_card_link" key={e.id} style={{ display: 'block', cursor: 'pointer' }}>
                 <div className="_left_inner_event_card">
                   <div className="_left_inner_event_card_iamge">
-                    <img src="/assets/images/feed_event1.png" alt="Image" className="_card_img" />
+                    <img src="/assets/images/feed_event1.png" alt="" className="_card_img" />
                   </div>
                   <div className="_left_inner_event_card_content">
                     <div className="_left_inner_card_date">

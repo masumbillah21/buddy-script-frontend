@@ -57,7 +57,7 @@ export default function Navbar() {
         <div className="container _custom_container">
           <div className="_logo_wrap">
             <Link className="navbar-brand" to="/">
-              <img src="/assets/images/logo.svg" alt="Image" className="_nav_logo" />
+              <img src="/assets/images/logo.svg" alt="Buddy Script" className="_nav_logo" />
             </Link>
           </div>
           <button 
@@ -150,7 +150,7 @@ export default function Navbar() {
                       <div className="_notifications_all">
                         <div className="_notification_box">
                           <div className="_notification_image">
-                            <img src="/assets/images/friend-req.png" alt="Image" className="_notify_img" />
+                            <img src="/assets/images/friend-req.png" alt="Buddy Script" className="_notify_img" />
                           </div>
                           <div className="_notification_txt">
                             <p className="_notification_para">
@@ -163,7 +163,7 @@ export default function Navbar() {
                         </div>
                         <div className="_notification_box">
                           <div className="_notification_image">
-                            <img src="/assets/images/profile-1.png" alt="Image" className="_notify_img" />
+                            <img src="/assets/images/profile-1.png" alt="Buddy Script" className="_notify_img" />
                           </div>
                           <div className="_notification_txt">
                             <p className="_notification_para">
@@ -294,7 +294,7 @@ export default function Navbar() {
                   <div className="_header_mobile_menu_top_inner">
                     <div className="_header_mobile_menu_logo">
                       <Link to="/" className="_mobile_logo_link">
-                        <img src="/assets/images/logo.svg" alt="Image" className="_nav_logo" />
+                        <img src="/assets/images/logo.svg" alt="Buddy Script" className="_nav_logo" />
                       </Link>
                     </div>
                     <div className="_header_mobile_menu_right">

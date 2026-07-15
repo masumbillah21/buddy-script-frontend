@@ -40,7 +40,7 @@ export default function SidebarRight() {
                 <div className="_right_inner_area_info_box">
                   <div className="_right_inner_area_info_box_image">
                     <Link to="#">
-                      <img src="/assets/images/Avatar.png" alt="Image" className="_ppl_img" />
+                      <img src="/assets/images/Avatar.png" alt="User" className="_ppl_img" />
                     </Link>
                   </div>
                   <div className="_right_inner_area_info_box_txt">

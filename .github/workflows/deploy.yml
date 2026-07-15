@@ -28,6 +28,7 @@ jobs:
       - name: Install dependencies & build
         env:
           REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+          CI: false
         run: |
           npm ci
           npm run build
