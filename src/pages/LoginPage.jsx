@@ -61,34 +61,34 @@ export default function LoginPage() {
                 </div>
                 <p className="_social_login_content_para _mar_b8">Welcome back</p>
                 <h4 className="_social_login_content_title _titl4 _mar_b50">Login to your account</h4>
-                
+
                 {error && (
                   <div className="alert alert-danger _mar_b20" style={{ padding: '10px 15px', borderRadius: '8px', fontSize: '14px' }}>
                     {error}
                   </div>
                 )}
-                
-                <button 
-                  type="button" 
+
+                <button
+                  type="button"
                   className="_social_login_content_btn _mar_b40"
                   onClick={() => navigate('/')}
                 >
-                  <img src="/assets/images/google.svg" alt="Logo" className="_google_img" /> 
+                  <img src="/assets/images/google.svg" alt="Logo" className="_google_img" />
                   <span>Or sign-in with google</span>
                 </button>
-                
+
                 <div className="_social_login_content_bottom_txt _mar_b40">
                   <span>Or</span>
                 </div>
-                
+
                 <form className="_social_login_form" onSubmit={handleLogin}>
                   <div className="row">
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_login_form_input _mar_b14">
                         <label className="_social_login_label _mar_b8">Email</label>
-                        <input 
-                          type="email" 
-                          className="form-control _social_login_input" 
+                        <input
+                          type="email"
+                          className="form-control _social_login_input"
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
@@ -98,9 +98,9 @@ export default function LoginPage() {
                     <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                       <div className="_social_login_form_input _mar_b14">
                         <label className="_social_login_label _mar_b8">Password</label>
-                        <input 
-                          type="password" 
-                          className="form-control _social_login_input" 
+                        <input
+                          type="password"
+                          className="form-control _social_login_input"
                           required
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
@@ -108,7 +108,7 @@ export default function LoginPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="row">
                     <div className="col-lg-6 col-xl-6 col-md-6 col-sm-12">
                       <div className="form-check _social_login_form_check">
@@ -122,7 +122,7 @@ export default function LoginPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="row">
                     <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
                       <div className="_social_login_form_btn _mar_t40 _mar_b60">
@@ -131,7 +131,7 @@ export default function LoginPage() {
                     </div>
                   </div>
                 </form>
-                
+
                 <div className="row">
                   <div className="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div className="_social_login_bottom_txt">

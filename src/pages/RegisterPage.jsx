@@ -12,6 +12,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [repeatPassword, setRepeatPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -22,6 +23,7 @@ export default function RegisterPage() {
       return;
     }
 
+    setLoading(true);
     try {
       const response = await apiRequest('/api/register', {
         method: 'POST',
@@ -47,6 +49,8 @@ export default function RegisterPage() {
       }
     } catch (err) {
       setError("Failed to connect to the backend server.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -182,7 +186,20 @@ export default function RegisterPage() {
                   <div className="row">
                     <div className="col-lg-12 col-md-12 col-xl-12 col-sm-12">
                       <div className="_social_registration_form_btn _mar_t40 _mar_b60">
-                        <button type="submit" className="_social_registration_form_btn_link _btn1">Register now</button>
+                        <button 
+                          type="submit" 
+                          className="_social_registration_form_btn_link _btn1"
+                          disabled={loading}
+                        >
+                          {loading ? (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '0.9rem', height: '0.9rem', border: '0.12em solid currentColor', borderRightColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spinner-border .75s linear infinite' }}></span>
+                              <span>Registering...</span>
+                            </div>
+                          ) : (
+                            'Register now'
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>

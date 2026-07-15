@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import SidebarLeft from '../components/SidebarLeft';
 import SidebarRight from '../components/SidebarRight';
 import Stories from '../components/Stories';
@@ -9,10 +9,32 @@ import { apiRequest } from '../services/api';
 export default function FeedPage() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [nextPageUrl, setNextPageUrl] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef(null);
 
-  const loadPosts = async () => {
+  const getEndpoint = (urlStr) => {
+    if (!urlStr) return null;
+    const idx = urlStr.indexOf('/api/');
+    if (idx !== -1) {
+      return urlStr.substring(idx);
+    }
+    return urlStr;
+  };
+
+  const loadPosts = async (isInitial = true) => {
+    if (isInitial) {
+      setLoading(true);
+    } else {
+      setLoadingMore(true);
+    }
+
     try {
-      const response = await apiRequest('/api/posts');
+      const endpoint = isInitial ? '/api/posts' : getEndpoint(nextPageUrl);
+      if (!endpoint) return;
+
+      const response = await apiRequest(endpoint);
       if (response.ok) {
         const result = await response.json();
         const mapped = result.data.map(postData => ({
@@ -32,18 +54,54 @@ export default function FeedPage() {
           commentsCount: postData.comments_count || 0,
           myReaction: postData.my_reaction
         }));
-        setPosts(mapped);
+
+        if (isInitial) {
+          setPosts(mapped);
+        } else {
+          setPosts(prevPosts => [...prevPosts, ...mapped]);
+        }
+
+        const next = result.links?.next;
+        setNextPageUrl(next || null);
+        setHasMore(!!next);
       }
     } catch (err) {
       console.error("Failed to load posts", err);
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setLoading(false);
+      } else {
+        setLoadingMore(false);
+      }
     }
   };
 
   useEffect(() => {
-    loadPosts();
+    loadPosts(true);
   }, []);
+
+  useEffect(() => {
+    if (loading) return;
+    
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadPosts(false);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [loading, hasMore, loadingMore, nextPageUrl]);
 
   const handleAddPost = async (postPayload) => {
     try {
@@ -98,6 +156,7 @@ export default function FeedPage() {
           myReaction: postData.my_reaction
         };
         setPosts(prevPosts => [mappedPost, ...prevPosts]);
+        return true;
       } else {
         try {
           const errorData = await response.json();
@@ -105,10 +164,12 @@ export default function FeedPage() {
         } catch (e) {
           alert("Failed to publish post.");
         }
+        return false;
       }
     } catch (err) {
       console.error(err);
       alert("Error connecting to server.");
+      return false;
     }
   };
 
@@ -153,13 +214,27 @@ export default function FeedPage() {
                 ) : posts.length === 0 ? (
                   <div className="text-center _mar_t20 text-muted">No posts available. Be the first to write something!</div>
                 ) : (
-                  posts.map(post => (
-                    <Post
-                      key={post.id}
-                      post={post}
-                      onDelete={handleDeletePost}
-                    />
-                  ))
+                  <>
+                    {posts.map(post => (
+                      <Post
+                        key={post.id}
+                        post={post}
+                        onDelete={handleDeletePost}
+                      />
+                    ))}
+                    
+                    {/* Sentinel for infinite scroll */}
+                    <div ref={loaderRef} style={{ height: '50px', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '20px 0' }}>
+                      {loadingMore && (
+                        <div className="text-muted" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div className="spinner-border spinner-border-sm text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                          <span>Loading more posts...</span>
+                        </div>
+                      )}
+                    </div>
+                  </>
                 )}
               </div>
             </div>
