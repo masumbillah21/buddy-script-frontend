@@ -274,12 +274,23 @@ export default function CreatePost({ onAddPost }) {
             className="_feed_inner_text_area_btn_link"
             onClick={handlePostSubmit}
             disabled={isSubmitting}
+            style={{ minWidth: '82px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
           >
             {isSubmitting ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" style={{ width: '0.8rem', height: '0.8rem', border: '0.12em solid currentColor', borderRightColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spinner-border .75s linear infinite' }}></span>
-                <span>Posting...</span>
-              </div>
+              <span 
+                className="spinner-border spinner-border-sm" 
+                role="status" 
+                aria-hidden="true" 
+                style={{ 
+                  width: '1rem', 
+                  height: '1rem', 
+                  border: '0.15em solid #ffffff', 
+                  borderRightColor: 'transparent', 
+                  borderRadius: '50%', 
+                  display: 'inline-block', 
+                  animation: 'spinner-border .75s linear infinite'
+                }}
+              ></span>
             ) : (
               <>
                 <svg className="_mar_img" xmlns="http://www.w3.org/2000/svg" width="14" height="13" fill="none" viewBox="0 0 14 13">
